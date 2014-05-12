@@ -11,7 +11,6 @@ define("IN_MYBB", 1);
 
 define('THIS_SCRIPT', 'fishstats.php');
 
-
 $change_dir = "./";
 
 if(!@chdir($forumdir) && !empty($forumdir))
@@ -40,10 +39,8 @@ $lang->load("portal");
 $fishstats_url = get_current_location();
 add_breadcrumb("PostStats", $mybb->settings['bburl']."/fishstats.php");
 
-
 $mybb->settings['myfishstats_group'] = '4,2';
 $plugins->run_hooks("fishstats_start");
-
 
 $access = false;
 
@@ -82,12 +79,9 @@ else
 {
     $prettystart = date("jS F, Y", strtotime($db->escape_string($mybb->input['mydate'])));
 	$prettyend = date("jS F, Y", strtotime($db->escape_string($mybb->input['enddate'])));
-	//$plusdate = $db->escape_string (strtotime($mybb->input['enddate']);
     $mydate = $db->escape_string (strtotime($mybb->input['mydate'])); // Always escape string data from a user!
 	$finddate = $db->escape_string (strtotime($mybb->input['enddate'])); // Always escape string data from a user!
 	$enddate = date($finddate+(60*60*24*1));
-
-
 }
 $statsquery = $db->query("
 			SELECT p.uid AS userid ,p.username AS username, p.dateline,p.pid, COUNT(p.pid) AS total
@@ -109,7 +103,6 @@ if ($db->num_rows($statsquery) > 0)
 		$poststablerows .= '<tr>
 		<td class="trow1">'. build_profile_link($mystats['username'], $mystats['userid']). '</td>
 		<td class="trow1">'. $count .'</td>
-
 		</tr>';		
 	}
 	$poststablefooter .= '<tr>
