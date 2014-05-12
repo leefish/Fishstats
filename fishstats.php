@@ -38,13 +38,10 @@ $lang->load("portal");
 
 // Fetch the current URL
 $fishstats_url = get_current_location();
-	add_breadcrumb("fishstats", $mybb->settings['bburl']."/fishstats.php");
+add_breadcrumb("PostStats", $mybb->settings['bburl']."/fishstats.php");
 
 
-//$mybb->settings['myfishstats_showfishstats'] = '1';
-//$mybb->settings['fishstats_perpage'] = '10';
-$mybb->settings['myfishstats_group'] = '4,15';
-$fishstats = 100 ;
+$mybb->settings['myfishstats_group'] = '4,2';
 $plugins->run_hooks("fishstats_start");
 
 
@@ -85,18 +82,19 @@ else
 {
     $prettystart = date("jS F, Y", strtotime($db->escape_string($mybb->input['mydate'])));
 	$prettyend = date("jS F, Y", strtotime($db->escape_string($mybb->input['enddate'])));
+	//$plusdate = $db->escape_string (strtotime($mybb->input['enddate']);
     $mydate = $db->escape_string (strtotime($mybb->input['mydate'])); // Always escape string data from a user!
-	$enddate = $db->escape_string (strtotime($mybb->input['enddate'])); // Always escape string data from a user!
-	
-	 
-}
+	$finddate = $db->escape_string (strtotime($mybb->input['enddate'])); // Always escape string data from a user!
+	$enddate = date($finddate+(60*60*24*1));
 
+
+}
 $statsquery = $db->query("
-			SELECT p.uid ,p.username, p.dateline,p.pid, COUNT(p.pid) AS total
+			SELECT p.uid AS userid ,p.username AS username, p.dateline,p.pid, COUNT(p.pid) AS total
 			FROM ".TABLE_PREFIX."posts p
 			WHERE p.dateline > $mydate AND p.dateline < $enddate AND p.visible = '1'
 			GROUP BY p.uid
-			ORDER BY total DESC
+			ORDER BY p.uid ASC
 		");
 
 if ($db->num_rows($statsquery) > 0)
@@ -105,17 +103,14 @@ if ($db->num_rows($statsquery) > 0)
 	$poststablefooter = "";
 	while ($mystats = $db->fetch_array($statsquery))
 	{
-		$statsuser = get_user($mystats['uid']);
 		$count = my_number_format($mystats['total']);
 		$total_posts += $mystats['total'];
 		
 		$poststablerows .= '<tr>
-		<td class="trow1">'. build_profile_link($statsuser['username'], $statsuser['uid']). '</td>
+		<td class="trow1">'. build_profile_link($mystats['username'], $mystats['userid']). '</td>
 		<td class="trow1">'. $count .'</td>
 
-		</tr>';
-		
-		
+		</tr>';		
 	}
 	$poststablefooter .= '<tr>
 		<td class="trow1">Totals</td>
@@ -129,7 +124,7 @@ else
 
 $template='<html>
 <head>
-<title>Banned</title>
+<title>PostStats</title>
 {$headerinclude}
 <script src="//ajax.googleapis.com/ajax/libs/scriptaculous/1.8.2/scriptaculous.js"></script>
 <script type="text/javascript" src="{$mybb->settings[\'bburl\']}/jscripts/datepicker.js"></script>
@@ -164,6 +159,7 @@ $template='<html>
 </tr>
 {$poststablerows}
 {$poststablefooter}
+<tr><td class="tfoot smalltext" colspan ="2" align="center">A <a href ="http://www.leefish.nl" target="blank" >leefish</a> Plugin</td></tr>
 </table>
 {$footer}
 <script type="text/javascript">
@@ -171,8 +167,6 @@ var dpicker = new DatePicker({
  relative : \'mydate\',
  keepFieldEmpty: true
 });
-</script>
-<script type="text/javascript">
 var dpicker = new DatePicker({
  relative : \'enddate\',
  keepFieldEmpty: true
@@ -188,5 +182,4 @@ $plugins->run_hooks("fishstats_end");
 eval("\$fishstats=\"".$template."\";");
 output_page($fishstats);
 }
-
 ?>
